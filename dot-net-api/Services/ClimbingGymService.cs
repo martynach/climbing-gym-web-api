@@ -11,15 +11,18 @@ public class ClimbingGymService: IClimbingGymService
 {
     private readonly ClimbingGymDbContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly ILogger<ClimbingRouteService> _logger;
 
-    public ClimbingGymService(ClimbingGymDbContext dbContext, IMapper mapper)
+    public ClimbingGymService(ClimbingGymDbContext dbContext, IMapper mapper, ILogger<ClimbingRouteService> logger)
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _logger = logger;
     }
     
     public List<ClimbingGymDto> GetAll()
     {
+        _logger.LogInformation("Getting all climbing gyms");
         var climbingGyms = _dbContext.ClimbingGyms
             .Include(cg => cg.ClimbingRoutes)
             .Include(cg => cg.Address)
@@ -31,6 +34,8 @@ public class ClimbingGymService: IClimbingGymService
 
     public ClimbingGymDto GetById(int id)
     {
+        _logger.LogInformation($"Getting climbing gym with id: {id}");
+
         var climbingGym = _dbContext.ClimbingGyms
             .Include(cg => cg.ClimbingRoutes)
             .Include(cg => cg.Address)
@@ -47,15 +52,19 @@ public class ClimbingGymService: IClimbingGymService
 
     public int AddNewClimbingGym(CreateClimbingGymDto dto)
     {
+        _logger.LogInformation($"Creating new climbing gym");
+
         var climbingGym = _mapper.Map<ClimbingGym>(dto);
         var result = _dbContext.ClimbingGyms.Add(climbingGym);
         _dbContext.SaveChanges();
-        Console.WriteLine($"Succesfully created climbing gym id: {climbingGym.Id}, result.Entity.Id: {result.Entity.Id}");
+        _logger.LogInformation($"Successfully created climbing gym with id: {climbingGym.Id}, result.Entity.Id: {result.Entity.Id}");
         return climbingGym.Id;
     }
 
     public void DeleteById(int id)
     {
+        _logger.LogInformation($"Deleting climbing gym with id: {id}");
+
         var climbingGym = _dbContext.ClimbingGyms.FirstOrDefault(cg => cg.Id == id);
         if (climbingGym is null)
         {

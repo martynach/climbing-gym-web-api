@@ -1,12 +1,14 @@
 ﻿using dot_net_api.Dtos;
 using dot_net_api.Entities;
 using dot_net_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dot_net_api.Controllers;
 
 [ApiController]
 [Route("api/climbingGym")]
+[Authorize]
 public class ClimbingGymController: ControllerBase
 {
     private readonly IClimbingGymService _climbingGymService;
@@ -17,6 +19,7 @@ public class ClimbingGymController: ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public ActionResult<IEnumerable<ClimbingGym>> GetClimbingGyms()
     {
         var dtos = _climbingGymService.GetAll();
@@ -31,6 +34,7 @@ public class ClimbingGymController: ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     public ActionResult AddClimbingGym([FromBody] CreateClimbingGymDto dto)
     {
 

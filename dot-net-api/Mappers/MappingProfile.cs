@@ -21,6 +21,11 @@ public class MappingProfile: Profile
                 config => config.MapFrom(dto => new Address()
                     { City = dto.City, Street = dto.Street, PostalCode = dto.PostalCode }));
 
+        CreateMap<CreateClimbingRouteDto, ClimbingRoute>();
+
+        CreateMap<User, GetUserDto>()
+            .ForMember(dto => dto.Role, config => config.MapFrom(u => u.Role.Name));
+
     }
     
 }

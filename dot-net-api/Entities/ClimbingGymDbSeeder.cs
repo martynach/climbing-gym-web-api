@@ -13,26 +13,45 @@ public class ClimbingGymDbSeeder
 
     public void Seed()
     {
-        if (_dbContext.Database.CanConnect())
+        if (!_dbContext.Database.CanConnect())
         {
-            Console.WriteLine("Successfully connected to db");
+            Console.WriteLine("Cannot connect to db");
+            return;
+        }
 
-            if (_dbContext.ClimbingGyms.IsNullOrEmpty())
-            {
-                Console.WriteLine("Climbing gyms are empty - start seeding");
-                var gyms = GetInitialClimbingGyms();
-                _dbContext.ClimbingGyms.AddRange(gyms);
-                _dbContext.SaveChanges();
-            }
-            else
-            {
-                Console.WriteLine("Climbing gyms seeding skipped.");
-            }
+        Console.WriteLine("Successfully connected to db");
+
+        SeedClimbingGyms();
+        SeedUserRoles();
+    }
+
+    private void SeedClimbingGyms()
+    {
+        if (_dbContext.ClimbingGyms.IsNullOrEmpty())
+        {
+            Console.WriteLine("Climbing gyms are empty - start seeding");
+            var gyms = GetInitialClimbingGyms();
+            _dbContext.ClimbingGyms.AddRange(gyms);
+            _dbContext.SaveChanges();
         }
         else
         {
-            Console.WriteLine("Cannot connect to db");
+            Console.WriteLine("Climbing gyms seeding skipped.");
+        }
+    }
 
+    private void SeedUserRoles()
+    {
+        if (_dbContext.Roles.IsNullOrEmpty())
+        {
+            Console.WriteLine("User roles are empty - start seeding");
+            var roles = GetRoles();
+            _dbContext.Roles.AddRange(roles);
+            _dbContext.SaveChanges();
+        }
+        else
+        {
+            Console.WriteLine("User roles seeding skipped.");
         }
     }
 
@@ -79,7 +98,6 @@ public class ClimbingGymDbSeeder
                         Grade = 6, Status = "Active"
                     }
                 }
-
             },
             new ClimbingGym()
             {
@@ -95,5 +113,14 @@ public class ClimbingGymDbSeeder
         };
         return climbingGyms;
     }
-    
+
+    private List<Role> GetRoles()
+    {
+        return new List<Role>()
+        {
+            new Role() { Name = "User" },
+            new Role() { Name = "Manager" },
+            new Role() { Name = "Admin" }
+        };
+    }
 }

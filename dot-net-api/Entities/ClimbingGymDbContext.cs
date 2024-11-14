@@ -8,6 +8,8 @@ public class ClimbingGymDbContext: DbContext
     public DbSet<ClimbingGym> ClimbingGyms { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<ClimbingRoute> ClimbingRoutes { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

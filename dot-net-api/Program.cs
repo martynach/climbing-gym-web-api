@@ -42,6 +42,10 @@ builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 builder.Services.AddSingleton(authenticationSettings);
 
 builder.Services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CreatorRequirementHandler>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 
 builder.Services.AddAuthentication(option =>
 {

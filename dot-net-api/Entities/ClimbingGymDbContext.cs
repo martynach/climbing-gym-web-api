@@ -47,7 +47,7 @@ public class ClimbingGymDbContext: DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // todo
-        string connectionString = "todo";
+        string connectionString = "Server=DPRW84-15G10;Database=ClimbingGymDB;Trusted_Connection=True;TrustServerCertificate=True;";
         optionsBuilder.UseSqlServer(connectionString);
 
     }

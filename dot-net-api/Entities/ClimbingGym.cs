@@ -13,5 +13,7 @@ public class ClimbingGym
     public virtual Address Address { get; set; }
     
     public virtual List<ClimbingRoute> ClimbingRoutes { get; set; }
+    public int? CreatorId { get; set; }
+    public virtual User? Creator { get; set; }
 }
 

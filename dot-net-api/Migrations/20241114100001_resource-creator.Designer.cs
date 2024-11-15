@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dot_net_api.Entities;
 
@@ -11,9 +12,11 @@ using dot_net_api.Entities;
 namespace dot_net_api.Migrations
 {
     [DbContext(typeof(ClimbingGymDbContext))]
-    partial class ClimbingGymDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241114100001_resource-creator")]
+    partial class resourcecreator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

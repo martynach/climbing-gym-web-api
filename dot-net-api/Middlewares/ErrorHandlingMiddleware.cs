@@ -24,6 +24,12 @@ public class ErrorHandlingMiddleware: IMiddleware
             _logger.LogDebug($"Not found exception: {notFound.Message}");
             await context.Response.WriteAsync(notFound.Message);
         }
+        catch (ForbidException forbidException)
+        {
+            context.Response.StatusCode = 403;
+            _logger.LogDebug($"Forbid exception: {forbidException.Message}");
+            await context.Response.WriteAsync(forbidException.Message);
+        }
         catch (Exception exception)
         {
             context.Response.StatusCode = 500;

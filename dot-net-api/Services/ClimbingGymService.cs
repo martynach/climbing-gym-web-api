@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Linq.Expressions;
+using System.Security.Claims;
 using AutoMapper;
 using dot_net_api.Authorization;
 using dot_net_api.Dtos;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace dot_net_api.ClimbingGymService;
 
-public class ClimbingGymService: IClimbingGymService
+public class ClimbingGymService : IClimbingGymService
 {
     private readonly ClimbingGymDbContext _dbContext;
     private readonly IMapper _mapper;
@@ -30,17 +31,63 @@ public class ClimbingGymService: IClimbingGymService
         _userContextService = userContextService;
         _authorizationService = authorizationService;
     }
-    
-    public List<ClimbingGymDto> GetAll()
+
+    public PagedResult<ClimbingGymDto> GetAll(GetAllQuery query)
     {
-        _logger.LogInformation("Getting all climbing gyms");
-        var climbingGyms = _dbContext.ClimbingGyms
-            .Include(cg => cg.ClimbingRoutes)
+        _logger.LogInformation(
+            $"Getting climbing gyms, query params: searchBy {query.SearchBy}; pageSize {query.PageSize}; pageNumber {query.PageNumber};");
+
+        // var climbingGyms = _dbContext.ClimbingGyms
+        //     .Include(cg => cg.ClimbingRoutes)
+        //     .Include(cg => cg.Address)
+        //     .ToList();
+
+        var baseQuery = _dbContext.ClimbingGyms
+            // .Include(cg => cg.ClimbingRoutes)
             .Include(cg => cg.Address)
+            .Where(cg =>
+                String.IsNullOrWhiteSpace(query.SearchBy)
+                || cg.Name.ToLower().Contains(query.SearchBy.ToLower())
+                || cg.Description.ToLower().Contains(query.SearchBy.ToLower())
+                || cg.Address.City.ToLower().Contains(query.SearchBy.ToLower())
+                || cg.Address.Street.ToLower().Contains(query.SearchBy.ToLower()));
+
+        var totalCount = baseQuery.Count();
+
+        if (!String.IsNullOrWhiteSpace(query.SortBy))
+        {
+            _logger.LogInformation(
+                $"Sorting climbing gyms: sortBy {query.SortBy}; sortDirection {query.SortDirection}");
+
+            var sortByDictionary = new Dictionary<string, Expression<Func<ClimbingGym, Object>>>()
+            {
+                { nameof(ClimbingGym.Name), cg => cg.Name },
+                { nameof(ClimbingGym.Description), cg => cg.Description },
+                { nameof(ClimbingGym.Address.City), cg => cg.Address.City },
+                { nameof(ClimbingGym.Address.Street), cg => cg.Address.Street }
+            };
+
+            if (query.SortDirection == SortDirection.DESC.ToString())
+            {
+                baseQuery = baseQuery.OrderByDescending(sortByDictionary[query.SortBy]);
+            }
+            else
+            {
+                baseQuery = baseQuery.OrderBy(sortByDictionary[query.SortBy]);
+            }
+        }
+
+        var climbingGyms = baseQuery
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize)
             .ToList();
 
         var dtos = _mapper.Map<List<ClimbingGymDto>>(climbingGyms);
-        return dtos;
+
+        var pagedResult = new PagedResult<ClimbingGymDto>(dtos, query.PageNumber, query.PageSize, totalCount);
+        return pagedResult;
+
+        return null;
     }
 
     public ClimbingGymDto GetById(int id)
@@ -69,7 +116,8 @@ public class ClimbingGymService: IClimbingGymService
         climbingGym.CreatorId = _userContextService.UserId;
         var result = _dbContext.ClimbingGyms.Add(climbingGym);
         _dbContext.SaveChanges();
-        _logger.LogInformation($"Successfully created climbing gym with id: {climbingGym.Id}, result.Entity.Id: {result.Entity.Id}");
+        _logger.LogInformation(
+            $"Successfully created climbing gym with id: {climbingGym.Id}, result.Entity.Id: {result.Entity.Id}");
         return climbingGym.Id;
     }
 
@@ -82,7 +130,7 @@ public class ClimbingGymService: IClimbingGymService
         {
             throw new NotFoundException($"Climbing gym with id: {id} not found");
         }
-        
+
         ClaimsPrincipal? user = _userContextService.User;
         if (user is null)
         {
@@ -94,9 +142,10 @@ public class ClimbingGymService: IClimbingGymService
 
         if (!authorizationResult.Succeeded)
         {
-            throw new ForbidException($"User with id: {_userContextService.UserId} cannot delete restaurant created by user with id: {climbingGym.CreatorId ?? -1}");
+            throw new ForbidException(
+                $"User with id: {_userContextService.UserId} cannot delete restaurant created by user with id: {climbingGym.CreatorId ?? -1}");
         }
-        
+
 
         _dbContext.Remove(climbingGym);
         _dbContext.SaveChanges();

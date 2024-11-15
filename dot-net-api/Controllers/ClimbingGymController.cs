@@ -20,9 +20,9 @@ public class ClimbingGymController: ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public ActionResult<IEnumerable<ClimbingGym>> GetClimbingGyms()
+    public ActionResult<PagedResult<ClimbingGymDto>> GetClimbingGyms([FromQuery] GetAllQuery query)
     {
-        var dtos = _climbingGymService.GetAll();
+        var dtos = _climbingGymService.GetAll(query);
         return Ok(dtos);
     }
 

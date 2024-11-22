@@ -1,7 +1,7 @@
 ﻿using dot_net_api.Services;
+using dot_net_api.Tmp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 
 namespace dot_net_api.Controllers;
 
@@ -12,6 +12,8 @@ public class FileController: ControllerBase
 {
     private readonly IFileService _fileService;
     private readonly ILogger<FileController> _logger;
+
+    private readonly Repository<int> _repository;
 
     public FileController(IFileService fileService, ILogger<FileController> logger)
     {
@@ -26,5 +28,7 @@ public class FileController: ControllerBase
        var file = _fileService.GetFileByName(fileName);
        return file;
     }
+    
+
     
 }

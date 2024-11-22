@@ -86,8 +86,6 @@ public class ClimbingGymService : IClimbingGymService
 
         var pagedResult = new PagedResult<ClimbingGymDto>(dtos, query.PageNumber, query.PageSize, totalCount);
         return pagedResult;
-
-        return null;
     }
 
     public ClimbingGymDto GetById(int id)

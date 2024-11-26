@@ -19,7 +19,7 @@ public class ClimbingGymController: ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Authorize(Policy = Constants.IsCreatorOfManyResourcesPolicy)]
     public ActionResult<PagedResult<ClimbingGymDto>> GetClimbingGyms([FromQuery] GetAllQuery query)
     {
         var dtos = _climbingGymService.GetAll(query);

@@ -44,6 +44,7 @@ builder.Services.AddSingleton(authenticationSettings);
 
 builder.Services.AddScoped<IAuthorizationHandler, MinimumAgeRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CreatorRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CreatedManyResourcesRequirementHandler>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
@@ -67,6 +68,7 @@ builder.Services.AddAuthentication(option =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(Constants.IsAdultPolicy, policyBuilder => policyBuilder.AddRequirements(new MinimumAgeRequirement(18)));
+    options.AddPolicy(Constants.IsCreatorOfManyResourcesPolicy, policyBuilder => policyBuilder.AddRequirements(new CreatedManyResourcesRequirement(2)));
 });
 
 var app = builder.Build();

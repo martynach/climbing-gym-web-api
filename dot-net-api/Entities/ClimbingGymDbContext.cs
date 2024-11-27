@@ -4,12 +4,15 @@ namespace dot_net_api.Entities;
 
 public class ClimbingGymDbContext: DbContext
 {
-    
     public DbSet<ClimbingGym> ClimbingGyms { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<ClimbingRoute> ClimbingRoutes { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+
+    public ClimbingGymDbContext(DbContextOptions<ClimbingGymDbContext> options) : base(options)
+    {
+    }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,13 +46,5 @@ public class ClimbingGymDbContext: DbContext
             .IsRequired();
 
     }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // todo
-        string connectionString = "";
-        optionsBuilder.UseSqlServer(connectionString);
-
-    }
-
+    
 }

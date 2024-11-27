@@ -1,14 +1,18 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace dot_net_api.Entities;
 
 public class ClimbingGymDbSeeder
 {
     private readonly ClimbingGymDbContext _dbContext;
+    private readonly IPasswordHasher<User> _passwordHasher;
 
-    public ClimbingGymDbSeeder(ClimbingGymDbContext dbContext)
+    public ClimbingGymDbSeeder(ClimbingGymDbContext dbContext, IPasswordHasher<User> passwordHasher)
     {
         _dbContext = dbContext;
+        _passwordHasher = passwordHasher;
     }
 
     public void Seed()
@@ -21,16 +25,47 @@ public class ClimbingGymDbSeeder
 
         Console.WriteLine("Successfully connected to db");
 
-        SeedClimbingGyms();
+        PerformPendingMigrations();
         SeedUserRoles();
+        var userId = SeedAdminUser();
+        SeedClimbingGyms(userId);
     }
 
-    private void SeedClimbingGyms()
+    private void PerformPendingMigrations()
+    {
+        var pendingMigrations = _dbContext.Database.GetPendingMigrations();
+        if(pendingMigrations != null && pendingMigrations.Any()) {
+            Console.WriteLine("There are some pending migrations - performing migrations");
+            _dbContext.Database.Migrate();
+        }
+        else
+        {
+            Console.WriteLine("There are no pending migrations - performing migration skipped");
+        }
+    }
+
+    //returns id of admin user
+    private int SeedAdminUser()
+    {
+        if (_dbContext.Users.IsNullOrEmpty())
+        {
+            var user = GetAdminUser();
+            _dbContext.Users.Add(user);
+            _dbContext.SaveChanges();
+            return user.Id;
+        }
+        
+        var existingUser = _dbContext.Users.ToList().First();
+        return existingUser.Id;
+
+    }
+
+    private void SeedClimbingGyms(int userId)
     {
         if (_dbContext.ClimbingGyms.IsNullOrEmpty())
         {
             Console.WriteLine("Climbing gyms are empty - start seeding");
-            var gyms = GetInitialClimbingGyms();
+            var gyms = GetInitialClimbingGyms(userId);
             _dbContext.ClimbingGyms.AddRange(gyms);
             _dbContext.SaveChanges();
         }
@@ -55,13 +90,31 @@ public class ClimbingGymDbSeeder
         }
     }
 
-    private List<ClimbingGym> GetInitialClimbingGyms()
+    private User GetAdminUser()
+    {
+        var user = new User()
+        {
+            FirstName = "admin",
+            LastName = "admin",
+            Age = 40,
+            RoleId = 3,
+            Email = "admin@gmail.com",
+        };
+        
+        var hashedPassword = _passwordHasher.HashPassword(user, "admin");
+
+        user.HashedPassword = hashedPassword;
+        return user;
+    }
+
+    private List<ClimbingGym> GetInitialClimbingGyms(int creatorId)
     {
         var climbingGyms = new List<ClimbingGym>()
         {
             new ClimbingGym()
             {
                 Name = "Poog Baldy Climbing",
+                CreatorId = creatorId,
                 Description = "Good climbing on various different boulder problems",
                 Address = new Address()
                 {
@@ -102,6 +155,7 @@ public class ClimbingGymDbSeeder
             new ClimbingGym()
             {
                 Name = "ForEver Climb&Eat",
+                CreatorId = creatorId,
                 Description = "Excellent climbs and even better food",
                 Address = new Address()
                 {

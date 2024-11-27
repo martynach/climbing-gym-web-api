@@ -11,6 +11,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<ClimbingGymDbContext>();
+// builder.Services.AddDbContext<ClimbingGymDbContext>();
+builder.Services.AddDbContext<ClimbingGymDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("ClimbingGymDatabaseConnectionString");
+    options.UseSqlServer(connectionString);
+});
+
 
 builder.Services.AddScoped<IClimbingGymService, ClimbingGymService>();
 builder.Services.AddScoped<IClimbingRouteService, ClimbingRouteService>();
@@ -87,7 +94,7 @@ else
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Local"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();

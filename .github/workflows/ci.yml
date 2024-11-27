@@ -1,0 +1,29 @@
+on:
+  push:
+    branches: [main]
+
+
+jobs:
+
+
+  build:
+
+  runs-on: linux
+  
+    - name: Checkout
+      uses: actions/checkout@v4.2.2
+
+- name: Setup .net sdk
+uses: actions/setup-dotnet@v4.1.0
+
+    - name: Restore dependencies
+    run: dotnet restore
+
+    - name: Build
+    run: dotnet build
+
+    - name: Run tests
+    run: dotnet test
+
+  
+

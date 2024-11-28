@@ -2,8 +2,6 @@ name: Build and deploy ASP.Net Core app to an Azure Web App
 
 env:
   AZURE_WEBAPP_NAME: your-app-name    # set this to the name of your Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '5'                 # set this to the .NET Core version to use
 
 on:
   push:
@@ -43,7 +41,7 @@ jobs:
     needs: build
     environment:
       name: 'Development'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      url: ${{ steps.deploy-to-azure.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build job
@@ -52,10 +50,9 @@ jobs:
           name: api-artifact
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
+        id: deploy-to-azure
         uses: azure/webapps-deploy@v2
         with:
-      #    app-name: ${{ env.AZURE_WEBAPP_NAME }}
           app-name: 'climbing-gym-dev'
           publish-profile: ${{ secrets.PUBLISH_PROFILE_DEV }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+

@@ -12,6 +12,6 @@ public interface IUserService
 
     public void DeleteById(int userId);
 
-    public void DeleteAll();
+    public void DeleteAll(
 
 }

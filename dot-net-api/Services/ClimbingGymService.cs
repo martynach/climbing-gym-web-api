@@ -111,7 +111,11 @@ public class ClimbingGymService : IClimbingGymService
         _logger.LogInformation($"Creating new climbing gym by user with id: {_userContextService.UserId}");
 
         var climbingGym = _mapper.Map<ClimbingGym>(dto);
-        climbingGym.CreatorId = _userContextService.UserId;
+        if (_userContextService.UserId is null)
+        {
+            throw new ForbidException("Cannot create climbing gym - no user provided");
+        }
+        climbingGym.CreatorId = _userContextService.UserId.Value;
         var result = _dbContext.ClimbingGyms.Add(climbingGym);
         _dbContext.SaveChanges();
         _logger.LogInformation(
@@ -141,7 +145,7 @@ public class ClimbingGymService : IClimbingGymService
         if (!authorizationResult.Succeeded)
         {
             throw new ForbidException(
-                $"User with id: {_userContextService.UserId} cannot delete restaurant created by user with id: {climbingGym.CreatorId ?? -1}");
+                $"User with id: {_userContextService.UserId} cannot delete restaurant created by user with id: {climbingGym.CreatorId}");
         }
 
 

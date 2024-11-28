@@ -25,11 +25,6 @@ public class CreatorRequirementHandler: AuthorizationHandler<CreatorRequirement,
         }
         
         var creatorId = resource.CreatorId;
-        if (creatorId is null)
-        {
-            _logger.LogInformation($"Cannot authorize user because there is no resource creator provided");
-            return Task.CompletedTask;
-        }
 
         _logger.LogInformation($"Authorizing user with name identifier {claim.Value} for access to resource with creator id: {creatorId}");
 
